@@ -117,9 +117,10 @@ function initMenu() {
       <div style="font-size:56px;font-weight:bold;font-family:monospace;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,0.4);margin-bottom:8px;letter-spacing:4px;">
         UNDEAD KINGDOM
       </div>
-      <div style="font-size:18px;font-family:monospace;color:#aaa;margin-bottom:50px;">
+      <div style="font-size:18px;font-family:monospace;color:#aaa;margin-bottom:8px;">
         3D FPS Shooter
       </div>
+      <div id="highScoreDisplay" style="font-size:16px;font-family:monospace;color:#ffcc00;margin-bottom:50px;"></div>
       <button id="btnMulai" style="
         font-size:22px;padding:12px 50px;background:#cc3333;color:white;
         border:2px solid #ff6666;font-family:monospace;cursor:pointer;
@@ -131,6 +132,10 @@ function initMenu() {
     document.getElementById('btnMulai').onmouseover = function() { this.style.background = '#ee4444'; };
     document.getElementById('btnMulai').onmouseout = function() { this.style.background = '#cc3333'; };
     document.getElementById('btnMulai').onclick = showControls;
+
+    const hs = getHighScore();
+    const hsDisplay = document.getElementById('highScoreDisplay');
+    if (hsDisplay) hsDisplay.textContent = hs > 0 ? `🏆 High Score: ${hs}` : '';
   }
 
   if (!document.getElementById('controlsScreen')) {
@@ -254,12 +259,26 @@ export function showHitmarker() {
   hitmarkerTimeout = setTimeout(() => { hm.style.opacity = '0'; }, 100);
 }
 
+function getHighScore() {
+  return parseInt(localStorage.getItem('highScore') || '0');
+}
+
+function setHighScore(score) {
+  if (score > getHighScore()) {
+    localStorage.setItem('highScore', score);
+  }
+}
+
 export function showGameOver() {
   const go = document.getElementById('gameOver');
   if (!go) return;
   go.style.display = 'flex';
+  setHighScore(state.score);
+  const highScore = getHighScore();
   const stats = document.getElementById('stats');
-  if (stats) stats.innerHTML = `Score: ${state.score}<br>Kills: ${state.kills}`;
+  if (stats) stats.innerHTML = `Score: ${state.score}<br>Kills: ${state.kills}<br><br>🏆 High Score: ${highScore}`;
+  const hsDisplay = document.getElementById('highScoreDisplay');
+  if (hsDisplay) hsDisplay.textContent = highScore > 0 ? `🏆 High Score: ${highScore}` : '';
 }
 
 let deathTimer = 0;

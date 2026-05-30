@@ -186,7 +186,28 @@ export function updateTargets(dt) {
       data.parts.leftLeg.rotation.x *= 0.9; data.parts.rightLeg.rotation.x *= 0.9;
     } else {
       const speed = distXZ < 10 ? data.speed : data.speed * 0.6;
+
+      // Gate attraction — steer distant zombies toward castle gates so
+      // they naturally path through openings instead of getting stuck on walls
+      if (distXZ > 10) {
+        const gates = [{x:0,z:28}, {x:0,z:-28}, {x:28,z:0}, {x:-28,z:0}, {x:0,z:7}];
+        let bestGate = {x:0,z:28};
+        let bestDist = Infinity;
+        for (const g of gates) {
+          const d = Math.sqrt((g.x - t.position.x) ** 2 + (g.z - t.position.z) ** 2);
+          if (d < bestDist) { bestDist = d; bestGate = g; }
+        }
+        const toGate = new THREE.Vector3(bestGate.x - t.position.x, 0, bestGate.z - t.position.z).normalize();
+        const gatePull = Math.min(0.7, bestDist / 40);
+        toPlayer.x = toPlayer.x * (1 - gatePull) + toGate.x * gatePull;
+        toPlayer.z = toPlayer.z * (1 - gatePull) + toGate.z * gatePull;
+        toPlayer.normalize();
+      }
+
+      // Resolve X and Z separately so zombies slide along walls
+      // instead of getting stuck head-on
       t.position.x += toPlayer.x * speed * dt;
+      checkEntityCollision(t.position, 0.4);
       t.position.z += toPlayer.z * speed * dt;
       checkEntityCollision(t.position, 0.4);
       data.walkTime += speed * dt * 3;

@@ -71,15 +71,22 @@ export function initWorld(scene) {
   // Tower helper: what x-z range a tower covers
   // Tower at (tx, tz) with size s covers [tx - s/2, tx + s/2] in both x and z
 
-  // ========== CASTLE KEEP (4 walls with a door gap on south side) ==========
+  // ========== CASTLE KEEP (4 walls, each with a door opening) ==========
   const keepWallH = 7;
   const keepWallThick = 0.5;
   const keepWallData = [
-    { x: 0, z: -4.5, w: 12, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },  // north
-    { x: 6, z: 0, w: keepWallThick, h: keepWallH, d: 9, color: 0x7a7a7a },       // east
-    { x: -6, z: 0, w: keepWallThick, h: keepWallH, d: 9, color: 0x7a7a7a },      // west
-    { x: -3.5, z: 4.5, w: 5, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },  // south-left wall
-    { x: 3.5, z: 4.5, w: 5, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },   // south-right wall
+    // North wall — gap at (0, -4.5) from x=-1.5 to +1.5
+    { x: -3.75, z: -4.5, w: 4.5, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },
+    { x: 3.75, z: -4.5, w: 4.5, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },
+    // East wall — gap at (6, 0) from z=-1.5 to +1.5
+    { x: 6, z: -3, w: keepWallThick, h: keepWallH, d: 3, color: 0x7a7a7a },
+    { x: 6, z: 3, w: keepWallThick, h: keepWallH, d: 3, color: 0x7a7a7a },
+    // South wall — gap at (0, 4.5) from x=-1.5 to +1.5
+    { x: -3.75, z: 4.5, w: 4.5, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },
+    { x: 3.75, z: 4.5, w: 4.5, h: keepWallH, d: keepWallThick, color: 0x7a7a7a },
+    // West wall — gap at (-6, 0) from z=-1.5 to +1.5
+    { x: -6, z: -3, w: keepWallThick, h: keepWallH, d: 3, color: 0x7a7a7a },
+    { x: -6, z: 3, w: keepWallThick, h: keepWallH, d: 3, color: 0x7a7a7a },
   ];
 
   // ========== INNER TOWERS (corners of inner bailey, 4 units in from outer walls) ==========
@@ -93,18 +100,6 @@ export function initWorld(scene) {
     x, z, w: innerTowerSize, h: innerTowerH, d: innerTowerSize, color: 0x8a8a7a
   }));
 
-  // ========== INNER WALLS (connect inner towers edge-to-edge) ==========
-  // Tower inner edges: ±(10 - 1.5) = ±8.5
-  // Each wall spans from -8.5 to +8.5 in one axis
-  const innerWallH = 5;
-  const innerWallData = [
-    { x: 0, z: -7, w: 17, h: innerWallH, d: 1, color: 0x888888 },  // north
-    { x: 10, z: 0, w: 1, h: innerWallH, d: 11, color: 0x888888 },  // east
-    { x: -5, z: 7, w: 7, h: innerWallH, d: 1, color: 0x888888 },   // south-left (gap from -1.5 to +1.5)
-    { x: 5, z: 7, w: 7, h: innerWallH, d: 1, color: 0x888888 },    // south-right
-    { x: -10, z: 0, w: 1, h: innerWallH, d: 11, color: 0x888888 }, // west
-  ];
-
   // ========== OUTER WALLS ==========
   // Outer perimeter forms a square with outer edge at ±28 in both x and z.
   // Corner towers (size 5) at each corner.
@@ -115,11 +110,18 @@ export function initWorld(scene) {
   const outerWallH = 5;
   const outerWallThick = 1.5;
   const outerWallData = [
-    { x: 0, z: -28, w: 51, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },  // north
-    { x: -13.5, z: 28, w: 24, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },  // south-left (gap from -1.5 to +1.5)
-    { x: 13.5, z: 28, w: 24, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },   // south-right
-    { x: 28, z: 0, w: outerWallThick, h: outerWallH, d: 51, color: 0x6a6a6a },     // east
-    { x: -28, z: 0, w: outerWallThick, h: outerWallH, d: 51, color: 0x6a6a6a },    // west
+    // North wall — gap at (0, -28) from x=-1.5 to +1.5
+    { x: -13.5, z: -28, w: 24, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },
+    { x: 13.5, z: -28, w: 24, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },
+    // South wall — gap at (0, 28) from x=-1.5 to +1.5
+    { x: -13.5, z: 28, w: 24, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },
+    { x: 13.5, z: 28, w: 24, h: outerWallH, d: outerWallThick, color: 0x6a6a6a },
+    // East wall — gap at (28, 0) from z=-1.5 to +1.5
+    { x: 28, z: -13.5, w: outerWallThick, h: outerWallH, d: 24, color: 0x6a6a6a },
+    { x: 28, z: 13.5, w: outerWallThick, h: outerWallH, d: 24, color: 0x6a6a6a },
+    // West wall — gap at (-28, 0) from z=-1.5 to +1.5
+    { x: -28, z: -13.5, w: outerWallThick, h: outerWallH, d: 24, color: 0x6a6a6a },
+    { x: -28, z: 13.5, w: outerWallThick, h: outerWallH, d: 24, color: 0x6a6a6a },
   ];
 
   // ========== OUTER CORNER TOWERS ==========
@@ -148,7 +150,6 @@ export function initWorld(scene) {
   const allBuildingData = [
     ...keepWallData,
     ...innerTowerData,
-    ...innerWallData,
     ...outerWallData,
     ...outerTowerData,
     ...houseData,

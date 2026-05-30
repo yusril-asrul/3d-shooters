@@ -109,12 +109,30 @@ function activateZombie(z, type) {
   z.userData.type = type; z.userData.alive = true;
   z.userData.walkTime = Math.random() * PI2; z.userData.attackCooldown = 0;
 
+  // Health bar
+  const barGroup = new THREE.Group();
+  const barBg = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.06, 0.04),
+    new THREE.MeshBasicMaterial({ color: 0x333333 })
+  );
+  barGroup.add(barBg);
+  const barFg = new THREE.Mesh(
+    new THREE.BoxGeometry(0.48, 0.05, 0.03),
+    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  );
+  barFg.position.z = 0.03;
+  barGroup.add(barFg);
+  z.userData.barGroup = barGroup;
+  z.userData.barFg = barFg;
+  scene.add(barGroup);
+
   scene.add(z);
   state.targets.push(z);
 }
 
 function deactivateZombie(z) {
   z.visible = false; z.userData.alive = false;
+  if (z.userData.barGroup) scene.remove(z.userData.barGroup);
   scene.remove(z);
   const idx = state.targets.indexOf(z);
   if (idx !== -1) state.targets.splice(idx, 1);
@@ -219,6 +237,23 @@ export function updateTargets(dt) {
       t.position.y = Math.abs(Math.sin(data.walkTime * 2)) * 0.05;
       t.rotation.x *= 0.9;
     }
+    // Update health bar
+    const barGroup = data.barGroup;
+    if (barGroup) {
+      const healthPct = data.health / data.maxHealth;
+      const barFg = data.barFg;
+      barFg.scale.x = Math.max(0, healthPct);
+      barFg.position.x = -(1 - healthPct) * 0.24;
+      if (healthPct > 0.6) barFg.material.color.setHex(0x00ff00);
+      else if (healthPct > 0.3) barFg.material.color.setHex(0xffff00);
+      else barFg.material.color.setHex(0xff0000);
+
+      barGroup.position.copy(t.position);
+      barGroup.position.y += 2.2 * (t.scale.x || 1);
+      const lookTarget = new THREE.Vector3(camera.position.x, barGroup.position.y, camera.position.z);
+      barGroup.lookAt(lookTarget);
+    }
+
     if (dist > 80) respawnZombie(t);
   }
 }

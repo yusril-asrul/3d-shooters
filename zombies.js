@@ -108,6 +108,7 @@ function activateZombie(z, type) {
   }
   z.userData.type = type; z.userData.alive = true;
   z.userData.walkTime = Math.random() * PI2; z.userData.attackCooldown = 0;
+  z.userData.attackTimer = 0;
 
   // Health bar
   const barGroup = new THREE.Group();
@@ -195,13 +196,48 @@ export function updateTargets(dt) {
     if (distXZ < 20) playZombieGrowl();
 
     if (distXZ < data.attackRange) {
-      data.walkTime += dt * 8;
-      const attackPhase = Math.sin(data.walkTime);
-      const lunge = Math.max(0, attackPhase) * 0.6;
-      t.position.y = lunge; t.rotation.x = -lunge * 0.3;
-      const thrust = Math.abs(attackPhase) * 1.2;
-      data.parts.leftArm.rotation.x = thrust; data.parts.rightArm.rotation.x = thrust;
-      data.parts.leftLeg.rotation.x *= 0.9; data.parts.rightLeg.rotation.x *= 0.9;
+      if (data.attackTimer <= 0 && data.attackCooldown <= 0) {
+        data.attackTimer = 0.6;
+        data.attackCooldown = 1.0;
+        data.lungeOrigX = t.position.x;
+        data.lungeOrigZ = t.position.z;
+      }
+
+      if (data.attackTimer > 0) {
+        data.attackTimer -= dt;
+        const phase = 1 - data.attackTimer / 0.6;
+        const windUpEnd = 0.35;
+        const lungeEnd = 0.6;
+        if (phase < windUpEnd) {
+          const p = phase / windUpEnd;
+          t.rotation.x = p * 0.4;
+          data.parts.leftArm.rotation.x = -p * 0.6;
+          data.parts.rightArm.rotation.x = -p * 0.6;
+          data.parts.leftLeg.rotation.x *= 0.95;
+          data.parts.rightLeg.rotation.x *= 0.95;
+          t.position.y = 0;
+        } else if (phase < lungeEnd) {
+          const p = (phase - windUpEnd) / (lungeEnd - windUpEnd);
+          t.rotation.x = (1 - p) * 0.4;
+          const lungeStep = p * 0.8;
+          t.position.x = data.lungeOrigX + toPlayer.x * lungeStep;
+          t.position.z = data.lungeOrigZ + toPlayer.z * lungeStep;
+          data.parts.leftArm.rotation.x = p * 1.0;
+          data.parts.rightArm.rotation.x = p * 1.0;
+          t.position.y = p * 0.3;
+        } else {
+          const p = (phase - lungeEnd) / (1 - lungeEnd);
+          t.rotation.x = (1 - p) * -0.1;
+          data.parts.leftArm.rotation.x = (1 - p) * 1.0;
+          data.parts.rightArm.rotation.x = (1 - p) * 1.0;
+          t.position.y = (1 - p) * 0.3;
+        }
+      } else {
+        t.rotation.x *= 0.9;
+        data.parts.leftArm.rotation.x *= 0.9;
+        data.parts.rightArm.rotation.x *= 0.9;
+        t.position.y *= 0.9;
+      }
     } else {
       const speed = distXZ < 10 ? data.speed : data.speed * 0.6;
 

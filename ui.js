@@ -63,16 +63,28 @@ export function initUI() {
     document.body.appendChild(go);
   }
 
-  if (!document.getElementById('scoreBoard')) {
-    const sb = document.createElement('div');
-    sb.id = 'scoreBoard';
-    sb.style.cssText = `
-      position:fixed;top:12px;left:50%;transform:translateX(-50%);
-      z-index:15;color:white;font-family:monospace;font-size:16px;
-      background:rgba(0,0,0,0.5);padding:6px 16px;border-radius:8px;
-      pointer-events:none;text-align:center;line-height:1.6;
+  if (!document.getElementById('hudInfo')) {
+    const info = document.createElement('div');
+    info.id = 'hudInfo';
+    info.style.cssText = `
+      position:fixed;top:10px;left:10px;z-index:15;
+      color:white;font-family:monospace;font-size:14px;
+      background:rgba(0,0,0,0.5);padding:8px 14px;border-radius:6px;
+      pointer-events:none;text-align:left;line-height:1.7;
     `;
-    document.body.appendChild(sb);
+    document.body.appendChild(info);
+  }
+
+  if (!document.getElementById('ammoDisplay')) {
+    const ammo = document.createElement('div');
+    ammo.id = 'ammoDisplay';
+    ammo.style.cssText = `
+      position:fixed;bottom:24px;right:24px;z-index:15;
+      color:white;font-family:monospace;font-size:22px;
+      background:rgba(0,0,0,0.5);padding:8px 18px;border-radius:6px;
+      pointer-events:none;text-align:right;line-height:1.4;
+    `;
+    document.body.appendChild(ammo);
   }
 
   if (!document.getElementById('minimap')) {
@@ -91,8 +103,9 @@ export function initUI() {
 }
 
 export function updateHUD() {
-  const sb = document.getElementById('scoreBoard');
-  if (!sb) return;
+  const info = document.getElementById('hudInfo');
+  const ammo = document.getElementById('ammoDisplay');
+  if (!info || !ammo) return;
 
   let waveInfo = `🌊 Wave ${state.wave}`;
   if (state.boss.active) {
@@ -103,19 +116,20 @@ export function updateHUD() {
     waveInfo += ` Complete! Next in ${Math.ceil(state.intermission)}s`;
   }
 
+  const healthColor = state.player.health > 50 ? '#ffffff' : state.player.health > 25 ? '#ffcc00' : '#ff4444';
+  info.innerHTML = `
+    <span style="color:${healthColor}">❤️ ${state.player.health.toFixed(0)}</span><br>
+    🎯 Score: ${state.score}<br>
+    💀 Kills: ${state.kills}<br>
+    ${waveInfo}
+  `;
+
   if (state.currentWeapon === 'knife') {
-    sb.innerHTML = `
-      ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
-      ${waveInfo}<br>
-      🔪 Knife
-    `;
+    ammo.innerHTML = `🔪 Knife`;
   } else {
     const w = state.weapon;
-    sb.innerHTML = `
-      ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
-      ${waveInfo}<br>
-      🔫 ${w.ammo} / ${w.reserve}
-    `;
+    const ammoColor = w.ammo === 0 ? '#ff4444' : '#ffffff';
+    ammo.innerHTML = `<span style="color:${ammoColor}">🔫 ${w.ammo}</span> / ${w.reserve}`;
   }
 }
 

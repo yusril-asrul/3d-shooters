@@ -181,7 +181,7 @@ export function updateDeathAnimation(dt) {
 }
 
 const MINIMAP_SIZE = 150;
-const MINIMAP_SCALE = 3.5;
+const MINIMAP_SCALE = 1.0;
 
 export function updateMinimap() {
   const canvas = document.getElementById('minimap');
@@ -207,17 +207,6 @@ export function updateMinimap() {
       const bd = (b.geometry.parameters.depth || 1.5) / MINIMAP_SCALE;
       ctx.fillStyle = 'rgba(100,100,100,0.7)';
       ctx.fillRect(bx - bs / 2, bz - bd / 2, bs, bd);
-    }
-  }
-
-  if (state.trees) {
-    for (const [tx, tz] of state.trees) {
-      const sx = cx + (tx - state.player.x) / MINIMAP_SCALE;
-      const sz = cy + (tz - state.player.z) / MINIMAP_SCALE;
-      ctx.fillStyle = 'rgba(0,200,0,0.5)';
-      ctx.beginPath();
-      ctx.arc(sx, sz, 2, 0, Math.PI * 2);
-      ctx.fill();
     }
   }
 

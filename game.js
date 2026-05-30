@@ -4,7 +4,7 @@ import { initAudio, playFootstep } from './audio.js';
 import { initWorld, checkCollision } from './world.js';
 import { initWeapon, shoot, reload, updateWeapon, updateTracers, switchWeapon } from './weapons.js';
 import { initZombies, createZombie, spawnBoss, updateTargets, updateParticles, updateDrops, enemyDamagePlayer, clearAllZombies } from './zombies.js';
-import { initUI, updateHUD, showMessage, hideMessage, gameOver, isDeathActive, setDeathActive, updateUI } from './ui.js';
+import { initUI, updateHUD, showMessage, hideMessage, hideMenus, gameOver, isDeathActive, setDeathActive, updateUI } from './ui.js';
 
 // --- Scene setup ---
 const scene = new THREE.Scene();
@@ -90,20 +90,8 @@ document.addEventListener('mouseup', (e) => {
 });
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-renderer.domElement.addEventListener('click', () => {
-  initAudio();
-  if (!state.isLocked) {
-    renderer.domElement.requestPointerLock();
-  }
-});
-
 document.addEventListener('pointerlockchange', () => {
   state.isLocked = document.pointerLockElement === renderer.domElement;
-  if (state.isLocked) {
-    hideMessage();
-  } else {
-    showMessage('Klik untuk mulai');
-  }
 });
 
 const lookSensitivity = 0.002;
@@ -120,6 +108,14 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// --- Start Game ---
+export function startGame() {
+  initAudio();
+  hideMenus();
+  renderer.domElement.requestPointerLock();
+  startWave(1);
+}
 
 // --- Restart ---
 export function restart() {
@@ -144,7 +140,7 @@ export function restart() {
   state.cameraRoll = 0;
   clearAllZombies();
   updateHUD();
-  hideMessage();
+  hideMenus();
   renderer.domElement.requestPointerLock();
   document.getElementById('restartBtn').style.display = '';
   const go = document.getElementById('gameOver');
@@ -309,5 +305,4 @@ function animate(time) {
 
 // --- Start ---
 updateHUD();
-showMessage('Klik untuk mulai');
 animate(0);

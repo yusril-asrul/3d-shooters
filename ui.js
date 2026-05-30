@@ -99,7 +99,90 @@ export function initUI() {
     document.body.appendChild(mm);
   }
 
+  initMenu();
   updateHUD();
+}
+
+// --- Menu Screens ---
+function initMenu() {
+  if (!document.getElementById('titleScreen')) {
+    const ts = document.createElement('div');
+    ts.id = 'titleScreen';
+    ts.style.cssText = `
+      position:fixed;inset:0;z-index:50;display:flex;
+      align-items:center;justify-content:center;flex-direction:column;
+      background:rgba(0,0,0,0.75);cursor:default;
+    `;
+    ts.innerHTML = `
+      <div style="font-size:56px;font-weight:bold;font-family:monospace;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,0.4);margin-bottom:8px;letter-spacing:4px;">
+        UNDEAD KINGDOM
+      </div>
+      <div style="font-size:18px;font-family:monospace;color:#aaa;margin-bottom:50px;">
+        3D FPS Shooter
+      </div>
+      <button id="btnMulai" style="
+        font-size:22px;padding:12px 50px;background:#cc3333;color:white;
+        border:2px solid #ff6666;font-family:monospace;cursor:pointer;
+        border-radius:8px;transition:background 0.15s;
+      ">MULAI</button>
+    `;
+    document.body.appendChild(ts);
+
+    document.getElementById('btnMulai').onmouseover = function() { this.style.background = '#ee4444'; };
+    document.getElementById('btnMulai').onmouseout = function() { this.style.background = '#cc3333'; };
+    document.getElementById('btnMulai').onclick = showControls;
+  }
+
+  if (!document.getElementById('controlsScreen')) {
+    const cs = document.createElement('div');
+    cs.id = 'controlsScreen';
+    cs.style.cssText = `
+      position:fixed;inset:0;z-index:50;display:none;
+      align-items:center;justify-content:center;flex-direction:column;
+      background:rgba(0,0,0,0.75);cursor:default;
+    `;
+    cs.innerHTML = `
+      <div style="font-size:32px;font-weight:bold;font-family:monospace;color:#eee;margin-bottom:24px;">
+        KONTROL
+      </div>
+      <div style="font-family:monospace;color:#ccc;font-size:16px;line-height:2.2;margin-bottom:36px;text-align:left;">
+        <span style="color:#ff6666">W A S D</span> &nbsp; Bergerak<br>
+        <span style="color:#ff6666">Mouse</span> &nbsp; Lihat<br>
+        <span style="color:#ff6666">Klik Kiri</span> &nbsp; Tembak<br>
+        <span style="color:#ff6666">Klik Kanan</span> &nbsp; Aim (ADS)<br>
+        <span style="color:#ff6666">R</span> &nbsp; Reload<br>
+        <span style="color:#ff6666">Spasi</span> &nbsp; Lompat<br>
+        <span style="color:#ff6666">Shift</span> &nbsp; Sprint<br>
+        <span style="color:#ff6666">1 / 2</span> &nbsp; Ganti Senjata
+      </div>
+      <button id="btnMulaiGame" style="
+        font-size:22px;padding:12px 50px;background:#cc3333;color:white;
+        border:2px solid #ff6666;font-family:monospace;cursor:pointer;
+        border-radius:8px;transition:background 0.15s;
+      ">MULAI GAME</button>
+    `;
+    document.body.appendChild(cs);
+
+    document.getElementById('btnMulaiGame').onmouseover = function() { this.style.background = '#ee4444'; };
+    document.getElementById('btnMulaiGame').onmouseout = function() { this.style.background = '#cc3333'; };
+    document.getElementById('btnMulaiGame').onclick = () => {
+      import('./game.js').then(m => m.startGame());
+    };
+  }
+}
+
+function showControls() {
+  const ts = document.getElementById('titleScreen');
+  const cs = document.getElementById('controlsScreen');
+  if (ts) ts.style.display = 'none';
+  if (cs) cs.style.display = 'flex';
+}
+
+export function hideMenus() {
+  const ts = document.getElementById('titleScreen');
+  const cs = document.getElementById('controlsScreen');
+  if (ts) ts.style.display = 'none';
+  if (cs) cs.style.display = 'none';
 }
 
 export function updateHUD() {

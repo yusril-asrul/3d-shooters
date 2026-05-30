@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { PI, PI2, state } from './state.js';
-import { checkEntityCollision } from './world.js';
 import { playZombieGrowl, playZombieAttack, playHit as playHitSound, playPlayerHurt, playPickup } from './audio.js';
 import { updateHUD, showDamageOverlay, showHitmarker, gameOver } from './ui.js';
 
@@ -260,12 +259,9 @@ export function updateTargets(dt) {
         toPlayer.normalize();
       }
 
-      // Resolve X and Z separately so zombies slide along walls
-      // instead of getting stuck head-on
+      // Zombies pass through all walls (only the player is blocked by collision)
       t.position.x += toPlayer.x * speed * dt;
-      checkEntityCollision(t.position, 0.4);
       t.position.z += toPlayer.z * speed * dt;
-      checkEntityCollision(t.position, 0.4);
       data.walkTime += speed * dt * 3;
       const swing = Math.sin(data.walkTime) * 0.5;
       const armSwing = Math.sin(data.walkTime + PI) * 0.4;

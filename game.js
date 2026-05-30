@@ -1189,8 +1189,7 @@ function restart() {
   player.isGrounded = true;
 
   // Clear targets (return to pool)
-  for (const t of targets) deactivateZombie(t);
-  targets.length = 0;
+  while (targets.length) deactivateZombie(targets[0]);
 
   // Clear particles
   for (const p of particles) scene.remove(p);

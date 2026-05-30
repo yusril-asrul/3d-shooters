@@ -49,4 +49,15 @@ export const state = {
   waveZombiesSpawned: 0,
   waveActive: true,
   intermission: 0,
+  boss: {
+    active: false,
+    obj: null,
+    health: 0,
+    maxHealth: 0,
+    tier: 0,
+    speed: 0,
+    damage: 0,
+    attackRange: 3,
+    attackCooldown: 0,
+  },
 };

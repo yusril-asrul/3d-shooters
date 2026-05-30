@@ -95,7 +95,9 @@ export function updateHUD() {
   if (!sb) return;
 
   let waveInfo = `🌊 Wave ${state.wave}`;
-  if (state.waveActive) {
+  if (state.boss.active) {
+    waveInfo += ` 👑 BOSS`;
+  } else if (state.waveActive) {
     waveInfo += ` (${state.waveZombiesKilled}/${state.waveZombieCount})`;
   } else if (state.intermission > 0) {
     waveInfo += ` Complete! Next in ${Math.ceil(state.intermission)}s`;
@@ -227,10 +229,21 @@ export function updateMinimap() {
     const dz = t.position.z - state.player.z;
     const screenX = cx + dx / MINIMAP_SCALE;
     const screenZ = cy + dz / MINIMAP_SCALE;
-    ctx.fillStyle = t.userData.type === 'tank' ? '#ff8800' : '#ff0000';
-    ctx.beginPath();
-    ctx.arc(screenX, screenZ, 2.5, 0, Math.PI * 2);
-    ctx.fill();
+    if (t.userData.type === 'boss') {
+      ctx.fillStyle = '#cc00ff';
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenZ - 5);
+      ctx.lineTo(screenX + 3, screenZ);
+      ctx.lineTo(screenX, screenZ + 5);
+      ctx.lineTo(screenX - 3, screenZ);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.fillStyle = t.userData.type === 'tank' ? '#ff8800' : '#ff0000';
+      ctx.beginPath();
+      ctx.arc(screenX, screenZ, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   if (state.drops) {

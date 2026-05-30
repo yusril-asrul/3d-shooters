@@ -3,7 +3,7 @@ import { state, PI, PI2 } from './state.js';
 import { initAudio, playFootstep } from './audio.js';
 import { initWorld, checkCollision } from './world.js';
 import { initWeapon, shoot, reload, updateWeapon, updateTracers, switchWeapon } from './weapons.js';
-import { initZombies, createZombie, updateTargets, updateParticles, updateDrops, enemyDamagePlayer, clearAllZombies } from './zombies.js';
+import { initZombies, createZombie, spawnBoss, updateTargets, updateParticles, updateDrops, enemyDamagePlayer, clearAllZombies } from './zombies.js';
 import { initUI, updateHUD, showMessage, hideMessage, gameOver, isDeathActive, setDeathActive, updateUI } from './ui.js';
 
 // --- Scene setup ---
@@ -164,6 +164,12 @@ function startWave(n) {
   showMessage(`Wave ${n}`);
   setTimeout(hideMessage, 2000);
   updateHUD();
+
+  // Boss wave every 5 waves
+  if (n % 5 === 0) {
+    state.waveZombieCount++;
+    setTimeout(() => spawnBoss(Math.floor(n / 5)), 2000);
+  }
 }
 
 // --- Game Loop ---

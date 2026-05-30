@@ -139,13 +139,14 @@ function deactivateZombie(z) {
   if (idx !== -1) state.targets.splice(idx, 1);
 }
 
-export function createZombie(type) {
+export function createZombie(type, waveZombie) {
   for (const z of zombiePool) {
-    if (!z.userData.alive) { activateZombie(z, type); return z; }
+    if (!z.userData.alive) { activateZombie(z, type); z.userData.waveZombie = !!waveZombie; return z; }
   }
   const z = buildZombieGeometry();
   zombiePool.push(z);
   activateZombie(z, type);
+  z.userData.waveZombie = !!waveZombie;
   return z;
 }
 
@@ -155,6 +156,7 @@ export function destroyZombie(zombie) {
   deactivateZombie(zombie);
   state.kills++;
   state.score += zombie.userData.killScore || 50;
+  if (zombie.userData.waveZombie) state.waveZombiesKilled++;
   updateHUD();
   if (Math.random() < 0.6) spawnDrop(pos);
 }

@@ -93,15 +93,25 @@ export function initUI() {
 export function updateHUD() {
   const sb = document.getElementById('scoreBoard');
   if (!sb) return;
+
+  let waveInfo = `🌊 Wave ${state.wave}`;
+  if (state.waveActive) {
+    waveInfo += ` (${state.waveZombiesKilled}/${state.waveZombieCount})`;
+  } else if (state.intermission > 0) {
+    waveInfo += ` Complete! Next in ${Math.ceil(state.intermission)}s`;
+  }
+
   if (state.currentWeapon === 'knife') {
     sb.innerHTML = `
       ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
+      ${waveInfo}<br>
       🔪 Knife
     `;
   } else {
     const w = state.weapon;
     sb.innerHTML = `
       ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
+      ${waveInfo}<br>
       🔫 ${w.ammo} / ${w.reserve}
     `;
   }

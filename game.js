@@ -150,7 +150,20 @@ export function restart() {
   const go = document.getElementById('gameOver');
   if (go) go.style.display = 'none';
   setDeathActive(false);
-  for (let i = 0; i < 8; i++) createZombie();
+  startWave(1);
+}
+
+function startWave(n) {
+  state.wave = n;
+  state.waveZombieCount = state.waveBaseCount + n * state.waveIncrement;
+  state.waveZombiesKilled = 0;
+  state.waveZombiesSpawned = 0;
+  state.waveActive = true;
+  state.intermission = 0;
+  state.spawnTimer = 1;
+  showMessage(`Wave ${n}`);
+  setTimeout(hideMessage, 2000);
+  updateHUD();
 }
 
 // --- Game Loop ---
@@ -242,11 +255,32 @@ function animate(time) {
   enemyDamagePlayer(dt);
   updateUI(dt);
 
-  // Auto-spawn
-  state.spawnTimer -= dt;
-  if (state.spawnTimer <= 0 && state.targets.length < 12) {
-    createZombie();
-    state.spawnTimer = 3 + Math.random() * 4;
+  // Wave spawn
+  if (state.waveActive && state.waveZombiesSpawned < state.waveZombieCount) {
+    state.spawnTimer -= dt;
+    if (state.spawnTimer <= 0 && state.targets.length < 12) {
+      createZombie(null, true);
+      state.waveZombiesSpawned++;
+      state.spawnTimer = 2 + Math.random() * 3;
+    }
+  }
+
+  // Wave completion
+  if (state.waveActive && state.waveZombiesSpawned >= state.waveZombieCount && state.waveZombiesKilled >= state.waveZombieCount) {
+    state.waveActive = false;
+    state.intermission = 12;
+    showMessage(`Wave ${state.wave} Complete!`);
+    setTimeout(hideMessage, 2500);
+    updateHUD();
+  }
+
+  // Intermission
+  if (state.intermission > 0 && !state.waveActive) {
+    state.intermission -= dt;
+    updateHUD();
+    if (state.intermission <= 0) {
+      startWave(state.wave + 1);
+    }
   }
 
   // Screen shake
@@ -270,6 +304,4 @@ function animate(time) {
 // --- Start ---
 updateHUD();
 showMessage('Klik untuk mulai');
-for (let i = 0; i < 6; i++) createZombie();
-state.spawnTimer = 3;
 animate(0);

@@ -41,4 +41,12 @@ export const state = {
   deathTimer: 0,
   spawnTimer: 0,
   footstepTimer: 0,
+  wave: 1,
+  waveBaseCount: 4,
+  waveIncrement: 4,
+  waveZombieCount: 8,
+  waveZombiesKilled: 0,
+  waveZombiesSpawned: 0,
+  waveActive: true,
+  intermission: 0,
 };

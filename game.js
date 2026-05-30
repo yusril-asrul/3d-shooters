@@ -806,18 +806,18 @@ function deactivateZombie(z) {
   if (idx !== -1) targets.splice(idx, 1);
 }
 
-function createZombie() {
+function createZombie(type) {
   // Find inactive zombie in pool
   for (const z of zombiePool) {
     if (!z.userData.alive) {
-      activateZombie(z);
+      activateZombie(z, type);
       return z;
     }
   }
   // Pool exhausted — create dynamically
   const z = buildZombieGeometry();
   zombiePool.push(z);
-  activateZombie(z);
+  activateZombie(z, type);
   return z;
 }
 
@@ -828,7 +828,7 @@ function destroyZombie(zombie) {
   deactivateZombie(zombie);
 
   kills++;
-  score += 50;
+  score += zombie.userData.killScore || 50;
   updateHUD();
 
   // Drop item with 60% chance
@@ -881,7 +881,7 @@ function updateTargets(dt) {
 
     if (distXZ < 20) playZombieGrowl();
 
-    if (distXZ < 1.6) {
+    if (distXZ < data.attackRange) {
       data.walkTime += dt * 8;
       const attackPhase = Math.sin(data.walkTime);
       const lunge = Math.max(0, attackPhase) * 0.6;
@@ -937,7 +937,7 @@ function hitTarget(mesh, point) {
     setTimeout(() => { parts.head.material.color.setHex(orig); }, 60);
   }
 
-  score += 10;
+  score += data.scoreValue || 10;
   updateHUD();
   playHit();
   // Hitmarker
@@ -1280,12 +1280,13 @@ function updateMinimap() {
   }
 
   // Zombies
-  ctx.fillStyle = '#ff3333';
   for (const t of targets) {
     const mx = (t.position.x - px) * scale + cx;
     const mz = (t.position.z - pz) * scale + cy;
+    ctx.fillStyle = t.userData.type === 'tank' ? '#ff8800' : '#ff3333';
+    const r = t.userData.type === 'tank' ? 5 : 3.5;
     ctx.beginPath();
-    ctx.arc(mx, mz, 3.5, 0, PI2);
+    ctx.arc(mx, mz, r, 0, PI2);
     ctx.fill();
   }
 

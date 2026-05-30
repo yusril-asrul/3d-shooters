@@ -4,7 +4,7 @@ import { initAudio, playFootstep } from './audio.js';
 import { initWorld, checkCollision } from './world.js';
 import { initWeapon, shoot, reload, updateWeapon, updateTracers, switchWeapon } from './weapons.js';
 import { initZombies, createZombie, spawnBoss, updateTargets, updateParticles, updateDrops, enemyDamagePlayer, clearAllZombies } from './zombies.js';
-import { initUI, updateHUD, showMessage, hideMessage, hideMenus, gameOver, isDeathActive, setDeathActive, updateUI } from './ui.js';
+import { initUI, updateHUD, showMessage, hideMessage, showPause, hidePause, hideMenus, gameOver, isDeathActive, setDeathActive, updateUI } from './ui.js';
 
 // --- Scene setup ---
 const scene = new THREE.Scene();
@@ -92,6 +92,11 @@ document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 document.addEventListener('pointerlockchange', () => {
   state.isLocked = document.pointerLockElement === renderer.domElement;
+  if (state.isLocked) {
+    hidePause();
+  } else if (!state.player.isDead) {
+    showPause();
+  }
 });
 
 const lookSensitivity = 0.002;
@@ -113,6 +118,7 @@ window.addEventListener('resize', () => {
 export function startGame() {
   initAudio();
   hideMenus();
+  state.player.isDead = false;
   renderer.domElement.requestPointerLock();
   startWave(1);
 }
@@ -122,6 +128,7 @@ export function restart() {
   state.player.health = state.player.maxHealth;
   state.player.velocityY = 0;
   state.player.isGrounded = true;
+  state.player.isDead = false;
   state.yaw = 0;
   state.pitch = 0;
   state.shakeIntensity = 0;
@@ -138,6 +145,7 @@ export function restart() {
   state.cameraHeight = state.cameraHeightDefault;
   state.cameraTilt = 0;
   state.cameraRoll = 0;
+  camera.position.y = state.player.height;
   clearAllZombies();
   updateHUD();
   hideMenus();

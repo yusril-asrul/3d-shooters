@@ -9,6 +9,7 @@ export const state = {
     height: 1.7,
     velocityY: 0,
     isGrounded: true,
+    isDead: false,
     x: 0,
     z: 0,
   },

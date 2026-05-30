@@ -104,6 +104,13 @@ export function initUI() {
 }
 
 // --- Menu Screens ---
+function showControls() {
+  const ts = document.getElementById('titleScreen');
+  const cs = document.getElementById('controlsScreen');
+  if (ts) ts.style.display = 'none';
+  if (cs) cs.style.display = 'flex';
+}
+
 function initMenu() {
   if (!document.getElementById('titleScreen')) {
     const ts = document.createElement('div');
@@ -174,20 +181,65 @@ function initMenu() {
       import('./game.js').then(m => m.startGame());
     };
   }
+
+  if (!document.getElementById('pauseScreen')) {
+    const ps = document.createElement('div');
+    ps.id = 'pauseScreen';
+    ps.style.cssText = `
+      position:fixed;inset:0;z-index:50;display:none;
+      align-items:center;justify-content:center;flex-direction:column;
+      background:rgba(0,0,0,0.75);cursor:default;
+    `;
+    ps.innerHTML = `
+      <div style="font-size:48px;font-weight:bold;font-family:monospace;color:#eee;margin-bottom:40px;">
+        ⏸ PAUSE
+      </div>
+      <button id="btnContinue" style="
+        font-size:22px;padding:12px 50px;background:#cc3333;color:white;
+        border:2px solid #ff6666;font-family:monospace;cursor:pointer;
+        border-radius:8px;transition:background 0.15s;
+      ">LANJUTKAN</button>
+    `;
+    document.body.appendChild(ps);
+
+    document.getElementById('btnContinue').onmouseover = function() { this.style.background = '#ee4444'; };
+    document.getElementById('btnContinue').onmouseout = function() { this.style.background = '#cc3333'; };
+    document.getElementById('btnContinue').onclick = () => {
+      const canvas = document.querySelector('canvas');
+      if (canvas) canvas.requestPointerLock();
+    };
+  }
 }
 
-function showControls() {
-  const ts = document.getElementById('titleScreen');
-  const cs = document.getElementById('controlsScreen');
-  if (ts) ts.style.display = 'none';
-  if (cs) cs.style.display = 'flex';
+export function showPause() {
+  const ps = document.getElementById('pauseScreen');
+  if (ps) ps.style.display = 'flex';
+  const info = document.getElementById('hudInfo');
+  const ammo = document.getElementById('ammoDisplay');
+  if (info) info.style.display = 'none';
+  if (ammo) ammo.style.display = 'none';
+}
+
+export function hidePause() {
+  const ps = document.getElementById('pauseScreen');
+  if (ps) ps.style.display = 'none';
+  const info = document.getElementById('hudInfo');
+  const ammo = document.getElementById('ammoDisplay');
+  if (info) info.style.display = '';
+  if (ammo) ammo.style.display = '';
 }
 
 export function hideMenus() {
   const ts = document.getElementById('titleScreen');
   const cs = document.getElementById('controlsScreen');
+  const ps = document.getElementById('pauseScreen');
   if (ts) ts.style.display = 'none';
   if (cs) cs.style.display = 'none';
+  if (ps) ps.style.display = 'none';
+  const info = document.getElementById('hudInfo');
+  const ammo = document.getElementById('ammoDisplay');
+  if (info) info.style.display = '';
+  if (ammo) ammo.style.display = '';
 }
 
 export function updateHUD() {
@@ -272,6 +324,8 @@ function setHighScore(score) {
 export function showGameOver() {
   const go = document.getElementById('gameOver');
   if (!go) return;
+  const btn = document.getElementById('restartBtn');
+  if (btn) btn.style.display = '';
   go.style.display = 'flex';
   setHighScore(state.score);
   const highScore = getHighScore();
@@ -286,6 +340,7 @@ let deathActive = false;
 export function gameOver() {
   if (deathActive) return;
   deathActive = true;
+  state.player.isDead = true;
   state.isLocked = false;
   deathTimer = 0;
   document.exitPointerLock();

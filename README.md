@@ -1,6 +1,8 @@
 # Undead Kingdom
 
 > 3D FPS survival shooter built with Three.js — defend your kingdom against waves of zombies.
+>
+> **▶ [Play now on GitHub Pages](https://yusril-asrul.github.io/3d-shooters/)**
 
 ![screenshot](https://i.ibb.co.com/5hNbjpSp/game1.jpg)
 

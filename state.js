@@ -1,0 +1,43 @@
+export const PI = Math.PI;
+export const PI2 = PI * 2;
+
+export const state = {
+  player: {
+    health: 100,
+    maxHealth: 100,
+    speed: 6,
+    height: 1.7,
+    velocityY: 0,
+    isGrounded: true,
+    x: 0,
+    z: 0,
+  },
+  cameraHeightDefault: 1.7,
+  cameraHeight: 1.7,
+  cameraTilt: 0,
+  cameraRoll: 0,
+  weapon: {
+    ammo: 30,
+    maxAmmo: 30,
+    reserve: 90,
+    damage: 25,
+    fireRate: 0.12,
+    reloadTime: 1.5,
+    isReloading: false,
+  },
+  targets: [],
+  drops: [],
+  particles: [],
+  tracers: [],
+  score: 0,
+  kills: 0,
+  yaw: 0,
+  pitch: 0,
+  isLocked: false,
+  isAiming: false,
+  shakeIntensity: 0,
+  damageTimer: 0,
+  deathTimer: 0,
+  spawnTimer: 0,
+  footstepTimer: 0,
+};

@@ -194,7 +194,7 @@ export function reload() {
   gunGroup.userData.reloadTimer = w.reloadTime;
   gunGroup.userData.reloadOffset = 0;
   playReloadSound();
-  showMessage('Memuat ulang...');
+  showMessage('Reload...');
   setTimeout(() => {
     const needed = w.maxAmmo - w.ammo;
     const available = Math.min(needed, w.reserve);

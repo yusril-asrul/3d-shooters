@@ -12,7 +12,7 @@ scene.background = new THREE.Color(0x87CEEB);
 scene.fog = new THREE.Fog(0x87CEEB, 80, 150);
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(0, 1.7, 0);
+camera.position.set(0, 1.7, 38);
 state.cameraHeightDefault = 1.7;
 state.cameraHeight = 1.7;
 state.cameraTilt = 0;

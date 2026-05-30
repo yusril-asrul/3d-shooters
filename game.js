@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { state, PI, PI2 } from './state.js';
 import { initAudio, playFootstep } from './audio.js';
 import { initWorld, checkCollision } from './world.js';
-import { initWeapon, shoot, reload, updateWeapon, updateTracers } from './weapons.js';
+import { initWeapon, shoot, reload, updateWeapon, updateTracers, switchWeapon } from './weapons.js';
 import { initZombies, createZombie, updateTargets, updateParticles, updateDrops, enemyDamagePlayer, clearAllZombies } from './zombies.js';
 import { initUI, updateHUD, showMessage, hideMessage, gameOver, isDeathActive, setDeathActive, updateUI } from './ui.js';
 
@@ -68,6 +68,8 @@ const keys = {};
 
 document.addEventListener('keydown', (e) => {
   keys[e.key.toLowerCase()] = true;
+  if (e.key === '1') switchWeapon('rifle');
+  if (e.key === '2') switchWeapon('knife');
   if (e.key.toLowerCase() === 'r') reload();
   if (e.key === ' ') {
     e.preventDefault();
@@ -134,6 +136,7 @@ export function restart() {
   state.weapon.ammo = state.weapon.maxAmmo;
   state.weapon.reserve = 90;
   state.weapon.isReloading = false;
+  switchWeapon('rifle');
   state.score = 0;
   state.kills = 0;
   state.cameraHeight = state.cameraHeightDefault;

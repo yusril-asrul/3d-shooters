@@ -93,11 +93,18 @@ export function initUI() {
 export function updateHUD() {
   const sb = document.getElementById('scoreBoard');
   if (!sb) return;
-  const w = state.weapon;
-  sb.innerHTML = `
-    ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
-    🔫 ${w.ammo} / ${w.reserve}
-  `;
+  if (state.currentWeapon === 'knife') {
+    sb.innerHTML = `
+      ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
+      🔪 Knife
+    `;
+  } else {
+    const w = state.weapon;
+    sb.innerHTML = `
+      ❤️ ${state.player.health.toFixed(0)} &nbsp; Score: ${state.score} &nbsp; Kills: ${state.kills}<br>
+      🔫 ${w.ammo} / ${w.reserve}
+    `;
+  }
 }
 
 export function showMessage(text) {

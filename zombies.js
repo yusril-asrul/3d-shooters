@@ -375,7 +375,7 @@ export function enemyDamagePlayer(dt) {
   for (const t of state.targets) {
     const dx = playerPos.x - t.position.x;
     const dz = playerPos.z - t.position.z;
-    if (Math.sqrt(dx * dx + dz * dz) < 1.7) {
+    if (Math.sqrt(dx * dx + dz * dz) < t.userData.attackRange + 0.3) {
       state.player.health -= 10;
       updateHUD();
       showDamageOverlay('rgba(255,0,0,0.5)');

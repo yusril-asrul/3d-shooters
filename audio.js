@@ -120,6 +120,29 @@ export function playReload() {
   setTimeout(() => playNoise(0.03, 1000, 'square', 0.15), 900);
 }
 
+export function playKnifeSwing() {
+  if (!audioCtx) return;
+  const bufferSize = audioCtx.sampleRate * 0.12;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    const t = i / audioCtx.sampleRate;
+    data[i] = Math.sin(t * (200 + t * 6000)) * 0.12 * Math.exp(-t * 20);
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.setValueAtTime(2000, audioCtx.currentTime);
+  src.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+  src.start();
+}
+
 export function playPickup(type) {
   if (!audioCtx) return;
   const freq = type === 'health' ? 600 : 400;

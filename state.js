@@ -25,6 +25,7 @@ export const state = {
     reloadTime: 1.5,
     isReloading: false,
   },
+  currentWeapon: 'rifle',
   targets: [],
   drops: [],
   particles: [],

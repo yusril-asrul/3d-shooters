@@ -1,14 +1,17 @@
 import * as THREE from 'three';
 import { state } from './state.js';
-import { playGunshot, playReload as playReloadSound } from './audio.js';
+import { playGunshot, playReload as playReloadSound, playKnifeSwing } from './audio.js';
 import { hitTarget } from './zombies.js';
 import { updateHUD, showMessage, hideMessage } from './ui.js';
 
 let scene;
 let camera;
 let gunGroup;
+let knifeGroup;
 let barrelTipLocal;
 let lastShotTime = 0;
+let isKnifeAttacking = false;
+let knifeSwingTimer = 0;
 const raycaster = new THREE.Raycaster();
 
 export function initWeapon(s, c) {
@@ -50,6 +53,38 @@ export function initWeapon(s, c) {
   gunGroup.userData.reloadTimer = 0;
   gunGroup.userData.basePos = new THREE.Vector3(0.35, -0.25, -0.5);
   scene.add(gunGroup);
+
+  knifeGroup = new THREE.Group();
+  knifeGroup.position.set(0, 0, 0);
+
+  const matSilver = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.8 });
+  const matBlack = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6, metalness: 0.3 });
+
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.003, 0.12), matSilver);
+  blade.position.set(0, 0, -0.06);
+  knifeGroup.add(blade);
+  const knifeGuard = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.003, 0.01), matBlack);
+  knifeGuard.position.set(0, 0, 0);
+  knifeGroup.add(knifeGuard);
+  const handle = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.025, 0.06), matDark);
+  handle.position.set(0, 0, 0.05);
+  knifeGroup.add(handle);
+
+  const matSkin = new THREE.MeshStandardMaterial({ color: 0xd4a574, roughness: 0.8 });
+  const matSleeve = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.9 });
+
+  const hand = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.04), matSkin);
+  hand.position.set(0, 0, 0.07);
+  knifeGroup.add(hand);
+
+  const forearm = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.10), matSleeve);
+  forearm.position.set(0, 0, 0.14);
+  knifeGroup.add(forearm);
+
+  knifeGroup.userData.basePos = new THREE.Vector3(0.25, -0.15, -0.45);
+  knifeGroup.userData.stabOffset = 0;
+  knifeGroup.visible = false;
+  scene.add(knifeGroup);
 }
 
 function getBarrelWorldPos() {
@@ -86,8 +121,10 @@ function createTracer(from, to) {
 }
 
 export function shoot() {
+  if (!state.isLocked) return;
+  if (state.currentWeapon === 'knife') { knifeAttack(); return; }
   const w = state.weapon;
-  if (!state.isLocked || w.isReloading) return;
+  if (w.isReloading) return;
   if (w.ammo <= 0) { reload(); return; }
   const now = performance.now();
   if (now - lastShotTime < w.fireRate * 1000) return;
@@ -118,7 +155,39 @@ export function shoot() {
   createTracer(barrelPos, endPoint);
 }
 
+function knifeAttack() {
+  const now = performance.now();
+  if (now - lastShotTime < 300) return;
+  if (isKnifeAttacking) return;
+  lastShotTime = now;
+  isKnifeAttacking = true;
+  knifeSwingTimer = 0;
+
+  playKnifeSwing();
+
+  raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+  raycaster.far = 2.5;
+  const intersects = raycaster.intersectObjects(state.targets, true);
+  if (intersects.length > 0) {
+    const hit = intersects[0];
+    hitTarget(hit.object, hit.point);
+  }
+}
+
+export function switchWeapon(type) {
+  if (type === state.currentWeapon) return;
+  if (state.weapon.isReloading) return;
+  state.currentWeapon = type;
+  gunGroup.visible = type === 'rifle';
+  knifeGroup.visible = type === 'knife';
+  isKnifeAttacking = false;
+  knifeSwingTimer = 0;
+  knifeGroup.userData.stabOffset = 0;
+  updateHUD();
+}
+
 export function reload() {
+  if (state.currentWeapon === 'knife') return;
   const w = state.weapon;
   if (w.isReloading || w.ammo === w.maxAmmo || w.reserve <= 0) return;
   w.isReloading = true;
@@ -138,6 +207,14 @@ export function reload() {
 }
 
 export function updateWeapon(dt) {
+  if (state.currentWeapon === 'rifle') {
+    updateRifle(dt);
+  } else {
+    updateKnife(dt);
+  }
+}
+
+function updateRifle(dt) {
   const w = state.weapon;
   if (gunGroup.userData.reloadTimer > 0) {
     gunGroup.userData.reloadTimer -= dt;
@@ -182,6 +259,30 @@ export function updateWeapon(dt) {
   const worldPos = offset.clone().applyQuaternion(camera.quaternion).add(camera.position);
   gunGroup.position.copy(worldPos);
   gunGroup.quaternion.copy(camera.quaternion);
+}
+
+function updateKnife(dt) {
+  if (isKnifeAttacking) {
+    knifeSwingTimer += dt;
+    const stabDuration = 0.2;
+    const t = Math.min(knifeSwingTimer / stabDuration, 1);
+    knifeGroup.userData.stabOffset = Math.sin(t * Math.PI) * 0.3;
+    if (t >= 1) {
+      isKnifeAttacking = false;
+      knifeSwingTimer = 0;
+      knifeGroup.userData.stabOffset = 0;
+    }
+  } else if (knifeGroup.userData.stabOffset !== 0) {
+    knifeGroup.userData.stabOffset *= 0.85;
+    if (Math.abs(knifeGroup.userData.stabOffset) < 0.001) knifeGroup.userData.stabOffset = 0;
+  }
+
+  const basePos = knifeGroup.userData.basePos.clone();
+  basePos.z -= knifeGroup.userData.stabOffset;
+
+  const worldPos = basePos.applyQuaternion(camera.quaternion).add(camera.position);
+  knifeGroup.position.copy(worldPos);
+  knifeGroup.quaternion.copy(camera.quaternion);
 }
 
 export function updateTracers(dt) {

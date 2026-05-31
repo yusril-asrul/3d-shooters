@@ -120,7 +120,7 @@ export function startGame() {
   hideMenus();
   state.player.isDead = false;
   renderer.domElement.requestPointerLock();
-  startWave(1);
+  startWave(state.wave);
 }
 
 // --- Restart ---
@@ -154,7 +154,7 @@ export function restart() {
   const go = document.getElementById('gameOver');
   if (go) go.style.display = 'none';
   setDeathActive(false);
-  startWave(1);
+  startWave(state.wave);
 }
 
 function startWave(n) {
